@@ -82,6 +82,59 @@ Even though we have passed username and password still this request is failed wi
 ![image](https://github.com/user-attachments/assets/ff64e13a-43a0-400f-a01b-14b56ab3d4c9)
 
 
+## Disable Spring Security Autocofiguration:
+This can be achieved by adding annotation 
+
+```
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity.build();
+    }
+}
+```
+
+- Above SecurityFilterChain doesn't have any applied filters, everyone can access the application without credentials.
+
+```
+ @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity.authorizeHttpRequests(requests -> requests.anyRequest().authenticated());
+        return httpSecurity.build();
+    }
+```
+- Above FIlter chain have disabled csrf and made all the requests authenticated.
+- But it doesn't provided any utility to the user to provide the username and password to access the resource.
+
+```
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity.authorizeHttpRequests(requests -> requests.anyRequest().authenticated());
+        httpSecurity.formLogin(Customizer.withDefaults());
+        return httpSecurity.build();
+    }
+```
+- Above filter chain will provide the login form to the user, but this will return login page content from the postman.
+
+![image](https://github.com/user-attachments/assets/6c030194-66e0-4adb-9f30-1c2f234a16c6)
+
+- to see the actual page add below filter
+  ```
+  httpSecurity.httpBasic(Customizer.withDefaults());
+  ```
+
+  ![image](https://github.com/user-attachments/assets/823f760f-a777-46a6-a09b-10ab17395e35)
+
+
+  
+
+
+
 
 
 
