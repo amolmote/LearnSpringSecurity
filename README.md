@@ -131,6 +131,38 @@ public class SecurityConfig {
   ![image](https://github.com/user-attachments/assets/823f760f-a777-46a6-a09b-10ab17395e35)
 
 
+## Customize UserDetailsService
+
+- Create bean inside SecurityConfig file for UserDetailsService:
+  ```
+  @Bean
+    public UserDetailsService userDetailsService(){
+        return new InMemoryUserDetailsManager();
+    }
+  ```
+- Try accessing the application using the default user and password which we have set in application.properties file
+![image](https://github.com/user-attachments/assets/9df43983-f4d7-413a-b616-59fcee777e08)
+
+- It won't work as we havent provided the proper implementation. We need to user the UserDetails. modify bean like below
+```
+@Bean
+    public UserDetailsService userDetailsService(){
+        UserDetails userDetails= User
+                                  .withDefaultPasswordEncoder()//User.withDefaultPasswordEncoder() is considered unsafe for production and is only intended for sample applications
+                                  .username("amolm") 
+                                  .password("amol123")
+                                  .roles("ADMIN")
+                                  .build();
+        return new InMemoryUserDetailsManager();
+    }
+```
+- Test application
+  ![image](https://github.com/user-attachments/assets/ab9ef0f0-9860-4266-afd5-7076572f5bba)
+
+
+  
+
+
   
 
 
