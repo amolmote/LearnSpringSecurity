@@ -356,7 +356,9 @@ public class UserRegistrationController {
 
 ```
 - Modify bean AuthenticationProvider, allow verification of password with BcryptPasswordEncoder
-  ```
+
+
+ ```
 @Bean
     public AuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider daoAuthenticationProvider= new DaoAuthenticationProvider();
