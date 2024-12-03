@@ -4,6 +4,7 @@ import com.abm.SpringSecurityDemo.entity.Employee;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,8 +27,8 @@ public class CsrfDemoController {
     }
 
     @PostMapping("/addEmployee")
-    public ResponseEntity<Employee> addEmployee(@RequestBody Employee emp){
+    public ResponseEntity<List<Employee>> addEmployee(@RequestBody Employee emp){
         list.add(emp);
-        return ResponseEntity.status(HttpStatus.OK).body(emp);
+        return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 }
