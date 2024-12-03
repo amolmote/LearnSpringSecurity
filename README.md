@@ -222,7 +222,6 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
 ```
 -  User model:
 ```
-```
 package com.abm.SpringSecurityDemo.entity;
 
 import jakarta.persistence.Entity;
