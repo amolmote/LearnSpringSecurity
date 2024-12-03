@@ -160,6 +160,169 @@ public class SecurityConfig {
   ![image](https://github.com/user-attachments/assets/ab9ef0f0-9860-4266-afd5-7076572f5bba)
 
 
+
+  ## Let's work with AuthenticationProvider(load users from database)
+  - AuthenticationProvider provide Authentication object
+  - create bean for AuthenticationProvider
+```
+   @Bean
+    public AuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider daoAuthenticationProvider= new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        return daoAuthenticationProvider;
+    }
+```
+- this bean does not have any password encoder. and it does have dependency on the UserDetailsService.
+- create a class which will provide the implementation for UserDetailsService and implement the method `loadUserByUsername` which returns UserDetails(interface) object.
+```
+package com.abm.SpringSecurityDemo.service;
+
+import com.abm.SpringSecurityDemo.entity.Users;
+import com.abm.SpringSecurityDemo.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserDetailsServiceImpl implements UserDetailsService {
+
+    @Autowired
+    public UserRepository userRepository;
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Users user=userRepository.getUserByUsername(username);
+        if(user==null){
+            System.out.println("User not found");
+            throw new UsernameNotFoundException("UsernameNotFoundException");
+        }
+        return new UserDetailsImpl(user);
+    }
+}
+```
+
+- create UserRepo which will load the users from database based on the username.
+```
+package com.abm.SpringSecurityDemo.repositories;
+
+import com.abm.SpringSecurityDemo.entity.Users;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserRepository extends JpaRepository<Users, Integer> {
+
+    @Query(nativeQuery = true,value = "SELECT * FROM spring_security_demo.users where username=:username")
+    Users getUserByUsername(String username);
+}
+
+```
+-  User model:
+```
+```
+package com.abm.SpringSecurityDemo.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity(name="users")
+public class Users {
+
+    @Id
+    private int id;
+    private String username;
+    private String password;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
+```
+
+- create class which will implement UserDetails, implement all the methods.
+```
+package com.abm.SpringSecurityDemo.service;
+
+import com.abm.SpringSecurityDemo.entity.Users;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.Collections;
+
+
+public class UserDetailsImpl implements UserDetails {
+    private Users user;
+
+    public UserDetailsImpl(Users user){
+        this.user=user;
+    }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singleton(new SimpleGrantedAuthority("USER"));
+    }
+
+    @Override
+    public String getPassword() {
+        return this.user.getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.user.getUsername();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+}
+
+```
+- Test application
+  
+
+
   
 
 
