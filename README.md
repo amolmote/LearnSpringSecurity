@@ -319,6 +319,52 @@ public class UserDetailsImpl implements UserDetails {
 
 ```
 - Test application
+
+
+
+
+## UserRegistration with encrypted pwd
+```
+package com.abm.SpringSecurityDemo.controllers;
+
+import com.abm.SpringSecurityDemo.entity.Users;
+import com.abm.SpringSecurityDemo.service.UserRegitrationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class UserRegistrationController {
+
+    @Autowired
+    private UserRegitrationService service;
+
+
+    private final BCryptPasswordEncoder passwordEncoder=new BCryptPasswordEncoder(10);
+
+    @PostMapping("/register")
+    public ResponseEntity<Users> registration(@RequestBody Users user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        Users user1= service.register(user);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+}
+
+```
+- Modify bean AuthenticationProvider, allow verification of password with BcryptPasswordEncoder
+  ```
+@Bean
+    public AuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider daoAuthenticationProvider= new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(new BCryptPasswordEncoder(10));
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        return daoAuthenticationProvider;
+    }
+```
   
 
 
