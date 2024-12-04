@@ -373,6 +373,22 @@ public class UserRegistrationController {
 ```
 
 ## Login Functionality and Verification:
+- Modified SecurityFilterChain bean which will allow user to access the /register and /login url without username and password.
+```
+ @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity
+                 .csrf(customizer-> customizer.disable())
+                 .authorizeHttpRequests(requests->
+                         requests.requestMatchers("register", "login")
+                                 .permitAll()
+                                 .anyRequest().authenticated())
+                 .httpBasic(Customizer.withDefaults())
+                 .sessionManagement(session-> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                 .build();
+    }
+
+```
 - Create Bean of AuthenticationManager in SecurityConfig class
 ```
 @Bean
@@ -439,22 +455,7 @@ public class UserLoginService {
 
 
 ## JWT
-- Modified SecurityFilterChain bean which will allow user to access the /register and /login url without username and password.
-  ```
- @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
-                 .csrf(customizer-> customizer.disable())
-                 .authorizeHttpRequests(requests->
-                         requests.requestMatchers("register", "login")
-                                 .permitAll()
-                                 .anyRequest().authenticated())
-                 .httpBasic(Customizer.withDefaults())
-                 .sessionManagement(session-> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                 .build();
-    }
 
-```
 
   
 
