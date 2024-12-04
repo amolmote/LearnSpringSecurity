@@ -2,6 +2,10 @@
 
 ## Project Setup
 
+- jjwt api
+- jjwt impl
+- jjwt jackson
+
 
 ## Setting Username and Password in config file
 
@@ -367,6 +371,91 @@ public class UserRegistrationController {
         return daoAuthenticationProvider;
     }
 ```
+
+## Login Functionality and Verification:
+- Create Bean of AuthenticationManager in SecurityConfig class
+```
+@Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+```
+- Create login controller
+```
+package com.abm.SpringSecurityDemo.controllers;
+
+import com.abm.SpringSecurityDemo.entity.Users;
+import com.abm.SpringSecurityDemo.service.UserLoginService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class UserLoginController {
+
+    @Autowired
+    UserLoginService loginService;
+
+    @PostMapping("/login")
+    public ResponseEntity<String> doLogin(@RequestBody  Users user){
+        String resp= loginService.verifyUserDetails(user);
+        return  ResponseEntity.status(HttpStatus.OK).body(resp);
+    }
+}
+```
+- Create UserLoginService class and implement verifyUserDetails method
+```
+package com.abm.SpringSecurityDemo.service;
+
+import com.abm.SpringSecurityDemo.entity.Users;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserLoginService {
+
+    @Autowired
+    private AuthenticationManager authManager;
+
+
+    public String verifyUserDetails(Users user){
+        Authentication authentication= authManager
+                .authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(),user.getPassword()));
+        if (authentication.isAuthenticated()) {
+            return "User Successfully Authenticated";
+        }
+        return "User Failed to Authenticate";
+    }
+}
+```
+- Test
+![image](https://github.com/user-attachments/assets/0327ed24-be82-4e29-bb6a-3ec975d067ae)
+
+
+## JWT
+- Modified SecurityFilterChain bean which will allow user to access the /register and /login url without username and password.
+  ```
+ @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity
+                 .csrf(customizer-> customizer.disable())
+                 .authorizeHttpRequests(requests->
+                         requests.requestMatchers("register", "login")
+                                 .permitAll()
+                                 .anyRequest().authenticated())
+                 .httpBasic(Customizer.withDefaults())
+                 .sessionManagement(session-> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                 .build();
+    }
+
+```
+
   
 
 
